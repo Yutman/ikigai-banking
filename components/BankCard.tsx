@@ -56,7 +56,7 @@ const BankCard = ({account, userName, showBalance = true}: CreditCardProps) => {
           className="absolute top-0 left-0"
         />
       </Link>
-
+    {/* COPY */}
     </div>
   )
 }
