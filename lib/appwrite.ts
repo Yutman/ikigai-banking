@@ -1,16 +1,19 @@
-"use server"; // files imported from here will be treated as server components
+'use server';
 
-import { Client, Account, Users, Databases } from "node-appwrite";
-import { cookies } from "next/headers";
+import { Client, Account, Users, Databases } from 'node-appwrite';
+import { cookies } from 'next/headers';
 
 export async function createSessionClient() {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
 
-  const session = await cookies().get("appwrite-session");
+  const session = await cookies().get('appwrite-session');
   if (!session || !session.value) {
-    throw new Error("No session");
+    return {
+      account: new Account(client),
+      session: null,
+    };
   }
 
   client.setSession(session.value);
@@ -37,6 +40,6 @@ export async function createAdminClient() {
     },
     get user() {
       return new Users(client);
-    }
+    },
   };
 }
