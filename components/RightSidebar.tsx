@@ -5,22 +5,24 @@ import BankCard from './BankCard'
 
 
 const RightSidebar = ({ user, transactions, banks }: RightSidebarProps) => {
- 
+      if (!user) return null; 
   return (
     <aside className="right-sidebar">
       <section className="flex flex-col pb-8">
         <div className="profile-banner" />
         <div className="profile">
           <div className="profile-img">
-            <span className="text-5xl font-bold text-blue-500">{user.name[0]}</span>
+            <span className="text-5xl font-bold text-blue-500">
+              {(user.name || user.firstName)?.[0] || 'G'}
+              </span>
           </div>
 
           <div className="profile-details">
             <h1 className='profile-name'>
-              {user.firstName} {user.name}
+              {user.name || `${user.firstName || ''} ${user.lastName || ''}`}
             </h1>
             <p className="profile-email">
-              {user.email}
+              {user.email || 'No email'}
             </p>
           </div>
         </div>

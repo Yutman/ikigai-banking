@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
@@ -9,13 +10,18 @@ const ibmPlexSerif = IBM_Plex_Serif({
   variable: '--font-ibm-plex-serif'
 })
 
-export const metadata: Metadata = {
-  title: "Ikigai",
-  description: "Connect, track, transfer, secured and private.",
-  icons: {
-    icon: '/icons/logo.svg'
-  }
-};
+export function generateMetadata(): Metadata {
+  return {
+    title: 'Ikigai',
+    description: 'Connect, track, transfer, secured and private.',
+    icons: {
+      icon: '/icons/logo.svg',
+    },
+    other: {
+      ...Sentry.getTraceData(),
+    },
+  };
+}
 
 export default function RootLayout({
   children,

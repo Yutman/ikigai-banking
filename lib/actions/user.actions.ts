@@ -6,18 +6,24 @@ import { cookies } from "next/headers";
 import { parseStringify } from "../utils";
 
 
-export const signIn = async ({email, password}: signInProps) => {
-        try {
-            const { account } = await createAdminClient();
+export const signIn = async ({ email, password }: signInProps) => {
+  try {
+    const { account } = await createSessionClient();
+    const session = await account.createEmailPasswordSession(email, password);
 
-            const response = await account.createEmailPasswordSession(
-                email, password);
+    cookies().set('appwrite-session', session.secret, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+    });
 
-                return parseStringify(response);
-        } catch (error) {
-         console.error('Error signing in:', error);   
-        }
-}
+    return parseStringify(session);
+  } catch (error) {
+    console.error('Error signing in:', error);
+    throw error;
+  }
+};
 
 export const signUp = async (userData:SignUpParams) => {
     const { email, password, firstName, lastName } = userData;  //destructuring userData to get email, password, firstName, and lastName
@@ -53,6 +59,7 @@ export async function getLoggedInUser() {
 
     return parseStringify(user);
   } catch (error) {
+    console.error('Get user error:', error);
     return null;
   }
 }
@@ -60,12 +67,10 @@ export async function getLoggedInUser() {
 export const logoutAccount = async () => {
     try {
         const { account } = await createSessionClient();
-
         cookies().delete('appwrite-session');
-
         await account.deleteSession('current');
-
     } catch (error) {
+        console.error('Logout error:', error);
         return null;
     }
 }

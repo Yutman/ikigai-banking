@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import CustomInput from "./CustomInput";
-import router, { useRouter } from "next/router";
+import { useRouter } from 'next/navigation';
 import {
   Form,
   FormControl,
@@ -25,6 +25,7 @@ import { Loader2 } from "lucide-react";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
+  const router = useRouter(); // Initialize router here
   const [user, setUser] = useState(null);
   const formSchema = authFormSchema(type);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +63,10 @@ const AuthForm = ({ type }: { type: string }) => {
           password: data.password,
       })
 
-        if (response) router.push("/");
+        if (response) {
+          router.push("/");
+          router.refresh();
+        }
       }
     } catch (error) {
       console.log(error);
