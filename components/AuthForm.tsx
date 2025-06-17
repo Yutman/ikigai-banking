@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authFormSchema } from "@/lib/utils";
+import PlaidLink from "./PlaidLink";
 
 import { Loader2 } from "lucide-react";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
@@ -101,7 +102,11 @@ const AuthForm = ({ type }: { type: string }) => {
         </div>
       </header>
       {user ? (
-        <div className="flex flex-col gap-4">{/* PlaidLink */}</div>
+        <div className="flex flex-col gap-4">
+         <PlaidLink
+              user={user}
+              variant='primary'/>
+          </div>
       ) : (
         <>
           <Form {...form}>
