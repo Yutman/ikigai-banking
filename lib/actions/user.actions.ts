@@ -16,21 +16,21 @@ const {
 } = process.env;
 
 
-// export const getUserInfo = async ({ userId }: getUserInfoProps) => {
-//   try {
-//     const { database } = await createAdminClient();
+export const getUserInfo = async ({ userId }: getUserInfoProps) => {
+  try {
+    const { database } = await createAdminClient();
 
-//     const user = await database.listDocuments(
-//       DATABASE_ID!,
-//       USER_COLLECTION_ID!,
-//       [Query.equal('userId', [userId])]
-//     )
+    const user = await database.listDocuments(
+      DATABASE_ID!,
+      USER_COLLECTION_ID!,
+      [Query.equal('userId', [userId])]
+    )
 
-//     return parseStringify(user.documents[0]);
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
+    return parseStringify(user.documents[0]);
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 export const signIn = async ({ email, password }: signInProps) => {
   try {
@@ -109,13 +109,16 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
 export async function getLoggedInUser() {
   try {
     const { account } = await createSessionClient();
-    const user = await account.get();
+    const result = await account.get();
+
+    const user = await getUserInfo({ userId: result.$id})
+
     return parseStringify(user);
   } catch (error) {
-    console.error('Get user error:', error);
+    console.log(error)
     return null;
   }
-};
+}
 
 export const logoutAccount = async () => {
   try {
@@ -238,6 +241,38 @@ export const exchangePublicToken = async ({
       } catch (error) {
         console.error('Exchange public token error:', error);
       }
+}
+
+export const getBanks = async ({ userId }: getBanksProps) => {
+  try {
+    const { database } = await createAdminClient();
+
+    const banks = await database.listDocuments(
+      DATABASE_ID!,
+      BANK_COLLECTION_ID!,
+      [Query.equal('userId', [userId])]
+    )
+
+    return parseStringify(banks.documents);
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const getBank = async ({ documentId }: getBankProps) => {
+  try {
+    const { database } = await createAdminClient();
+
+    const bank = await database.listDocuments(
+      DATABASE_ID!,
+      BANK_COLLECTION_ID!,
+      [Query.equal('$id', [documentId])]
+    )
+
+    return parseStringify(bank.documents[0]);
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 
