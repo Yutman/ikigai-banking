@@ -14,6 +14,7 @@ const Copy = ({ title }: { title: string }) => {
       setHasCopied(false);
     }, 2000);
   };
+  
 
   return (
     <Button
