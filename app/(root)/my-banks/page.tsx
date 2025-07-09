@@ -23,13 +23,17 @@ const MyBanks = async () => {
             Your cards
           </h2>
           <div className="flex flex-wrap gap-6">
-            {accounts && accounts.data.map((a: Account) => (
-              <BankCard 
-                key={accounts.id}
-                account={a}
-                userName={loggedIn?.firstName}
-              />
-            ))}
+            {accounts && accounts.data && accounts.data.length > 0 ? (
+              accounts.data.map((a: Account) => (
+                <BankCard 
+                  key={a.appwriteItemId} // Changed from accounts.id to a.appwriteItemId
+                  account={a}
+                  userName={loggedIn?.firstName}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500">No bank accounts found. Please connect a bank account.</p>
+            )}
           </div>
         </div>
       </div>
