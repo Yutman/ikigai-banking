@@ -27,9 +27,33 @@ const CategoryBadge = ({ category }: CategoryBadgeProps) => {
   )
 } 
 
-const TransactionsTable = ({transactions}: TransactionTableProps) => {
+const TransactionsTable = ({ transactions }: TransactionTableProps) => {
+  if (!transactions || transactions.length === 0) {
+    return (
+      <Table>
+        <TableHeader className="bg-[#f9fafb]">
+          <TableRow>
+            <TableHead className="px-2">Transaction</TableHead>
+            <TableHead className="px-2">Amount</TableHead>
+            <TableHead className="px-2">Status</TableHead>
+            <TableHead className="px-2">Date</TableHead>
+            <TableHead className="px-2 max-md:hidden">Channel</TableHead>
+            <TableHead className="px-2 max-md:hidden">Category</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell colSpan={6} className="text-center">
+              No transactions found.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+  }
+
   return (
-       <Table>
+    <Table>
       <TableHeader className="bg-[#f9fafb]">
         <TableRow>
           <TableHead className="px-2">Transaction</TableHead>
