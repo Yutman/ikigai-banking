@@ -110,7 +110,7 @@
   }
 
   .home-content {
-    @apply no-scrollbar flex w-full flex-1 flex-col gap-8 px-5 sm:px-8 py-7 lg:py-12 xl:max-h-screen xl:overflow-y-scroll max-w-[calc(100vw-400px)] xl:max-w-[calc(100vw-550px)];
+    @apply no-scrollbar flex w-full flex-1 flex-col gap-8 px-5 sm:px-8 py-7 lg:py-12 xl:max-h-screen xl:overflow-y-scroll max-w-[calc(100vw-400px)] xl:max-w-[calc(100vw-550px)] overflow-x-hidden;
   }
 
   .home-header {
@@ -146,7 +146,7 @@
   }
 
   .recent-transactions-tablist {
-    @apply custom-scrollbar mb-8 flex w-full flex-nowrap;
+    @apply custom-scrollbar mb-8 flex w-full flex-nowrap overflow-x-hidden;
   }
 
   /* Right sidebar */
