@@ -1,9 +1,8 @@
 # Ikigai Banking App
 
-## 🤖 Introduction
+## Introduction
 Built with Next.js, Ikigai is a financial SaaS platform that connects to multiple bank accounts, displays transactions in real-time, allows users to transfer money to other platform users, and manages their finances altogether. This app provides a secure and private environment for users to track, connect, and transfer funds seamlessly.
 
-If you're getting started and need assistance or face any bugs, feel free to open an issue on our [GitHub Issues](https://github.com/Yutman/ikigai-banking/issues).
 
 ## ⚙️ Tech Stack
 - Next.js
@@ -14,15 +13,19 @@ If you're getting started and need assistance or face any bugs, feel free to ope
 - Axios
 
 ## 🔋 Features
-👉 **Authentication**: An ultra-secure SSR authentication with proper validations and authorization, implemented with a local JWT-based system.
-👉 **Connect Banks**: Integrates with bank account linking functionality (Plaid support pending).
-👉 **Home Page**: Shows a general overview of user accounts with total balance from all connected banks, recent transactions, and a 'View All' option.
-👉 **My Banks**: Check the complete list of all connected banks with respective balances and account details.
-👉 **Transaction History**: Includes pagination and filtering options for viewing transaction history.
-👉 **Responsiveness**: Adapts to various screen sizes, with adjustable sidebar and content sections, and horizontal scrolling for narrower screens like 13.3-inch laptops.
-👉 **Funds Transfer**: Allows users to transfer funds (integration pending).
+**Authentication**: An ultra-secure SSR authentication with proper validations and authorization, implemented with a local JWT-based system.
 
-## 🤸 Quick Start
+**Connect Banks**: Integrates with bank account linking functionality (Plaid support pending).
+
+**Home Page**: Shows a general overview of user accounts with total balance from all connected banks, recent transactions, and a 'View All' option.
+
+**My Banks**: Check the complete list of all connected banks with respective balances and account details.
+
+**Transaction History**: Includes pagination and filtering options for viewing transaction history.
+
+**Funds Transfer**: Allows users to transfer funds (integration pending).
+
+## Quick Start
 Follow these steps to set up the Ikigai Banking App locally on your machine.
 
 ### Prerequisites
@@ -51,8 +54,6 @@ Make sure you have the following installed on your machine:
 
 ## Environment Variables
 Copy `.env.example` to `.env` and update:
-- `DATABASE_URL=your_mongodb_url`
-- `NEXT_PUBLIC_API_KEY=your_api_key` (if applicable)
 
 ## API Endpoints
 - `GET /api/transactions`: Fetch recent transactions
