@@ -4,7 +4,7 @@ import { createAdminClient, createSessionClient } from '@/lib/appwrite';
 import { ID, Query } from 'node-appwrite';
 import { cookies } from 'next/headers';
 import { parseStringify, encryptId, extractCustomerIdFromUrl } from '../utils';
-import {Products, CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum } from 'plaid';
+import { Products, CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum } from 'plaid';
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from './dwolla.actions';
@@ -14,7 +14,6 @@ const {
   APPWRITE_USER_COLLECTION_ID: USER_COLLECTION_ID,
   APPWRITE_BANK_COLLECTION_ID: BANK_COLLECTION_ID,
 } = process.env;
-
 
 export const getUserInfo = async ({ userId }: getUserInfoProps) => {
   try {
@@ -51,7 +50,6 @@ export const signIn = async ({ email, password }: signInProps) => {
     console.error('Error', error);
   }
 }
-
 
 export const signUp = async ({ password, ...userData}: SignUpParams) => {
   const { email, firstName, lastName } = userData;
@@ -138,7 +136,7 @@ export const createLinkToken = async (user: User) => {
         client_user_id: user.$id
       },
       client_name: `${user.firstName} ${user.lastName}`,
-      products: ['auth'] as Products[],
+      products: ['auth', 'transactions'] as Products[],
       language: 'en',
       country_codes: ['US'] as CountryCode[],
     }
@@ -148,6 +146,7 @@ export const createLinkToken = async (user: User) => {
     return parseStringify({ linkToken: response.data.link_token })
   } catch (error) {
     console.log(error);
+    return null;
   }
 }
 
@@ -176,12 +175,14 @@ export const createBankAccount = async ({
       }
     )
 
+    console.log('Created bank account in Appwrite:', parseStringify(bankAccount));
+
     return parseStringify(bankAccount);
   } catch (error) {
-    console.log(error);
+    console.error('Error creating bank account:', error);
+    return null; // Added fallback
   }
 }
-
 
 export const exchangePublicToken = async ({
   publicToken,
@@ -222,7 +223,7 @@ export const exchangePublicToken = async ({
     if (!fundingSourceUrl) throw Error;
 
     // Create a bank account using the user ID, item ID, account ID, access token, funding source URL, and shareableId ID
-    await createBankAccount({
+    const bankAccount = await createBankAccount({
       userId: user.$id,
       bankId: itemId,
       accountId: accountData.account_id,
@@ -230,6 +231,8 @@ export const exchangePublicToken = async ({
       fundingSourceUrl,
       shareableId: encryptId(accountData.account_id),
     });
+
+    if (!bankAccount) throw new Error('Failed to create bank account in Appwrite');
 
     // Revalidate the path to reflect the changes
     revalidatePath("/");
@@ -240,6 +243,7 @@ export const exchangePublicToken = async ({
     });
       } catch (error) {
         console.error('Exchange public token error:', error);
+        return null; // Added fallback
       }
 }
 
@@ -292,8 +296,6 @@ export const getBankByAccountId = async ({ accountId }: getBankByAccountIdProps)
     console.log(error)
   }
 }
-
-
 
 
 

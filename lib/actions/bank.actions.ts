@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import {
   ACHClass,
@@ -21,8 +21,12 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
     // get banks from db
     const banks = await getBanks({ userId });
 
+    if (!banks) {
+      return parseStringify({ data: [], totalBanks: 0, totalCurrentBalance: 0 });
+    }
+
     const accounts = await Promise.all(
-      banks?.map(async (bank: Bank) => {
+      banks.map(async (bank: Bank) => {
         // get each account info from plaid
         const accountsResponse = await plaidClient.accountsGet({
           access_token: bank.accessToken,
@@ -36,8 +40,8 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 
         const account = {
           id: accountData.account_id,
-          availableBalance: accountData.balances.available!,
-          currentBalance: accountData.balances.current!,
+          availableBalance: accountData.balances.available ?? 0,
+          currentBalance: accountData.balances.current ?? 0,
           institutionId: institution.institution_id,
           name: accountData.name,
           officialName: accountData.official_name,
@@ -60,6 +64,7 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
     return parseStringify({ data: accounts, totalBanks, totalCurrentBalance });
   } catch (error) {
     console.error("An error occurred while getting the accounts:", error);
+    return parseStringify({ data: [], totalBanks: 0, totalCurrentBalance: 0 });
   }
 };
 
@@ -68,6 +73,10 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
   try {
     // get bank from db
     const bank = await getBank({ documentId: appwriteItemId });
+    if (!bank) {
+      console.error("getAccount: Bank not found for documentId:", appwriteItemId);
+      return parseStringify({ data: null, transactions: [] });
+    }
 
     // get account info from plaid
     const accountsResponse = await plaidClient.accountsGet({
@@ -80,7 +89,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
       bankId: bank.$id,
     });
 
-    const transferTransactions = transferTransactionsData.documents.map(
+    const transferTransactions = transferTransactionsData?.documents?.map(
       (transferData: Transaction) => ({
         id: transferData.$id,
         name: transferData.name!,
@@ -90,7 +99,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
         category: transferData.category,
         type: transferData.senderBankId === bank.$id ? "debit" : "credit",
       })
-    );
+    ) || [];
 
     // get institution info from plaid
     const institution = await getInstitution({
@@ -98,13 +107,13 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     });
 
     const transactions = await getTransactions({
-      accessToken: bank?.accessToken,
+      accessToken: bank.accessToken,
     });
 
     const account = {
       id: accountData.account_id,
-      availableBalance: accountData.balances.available!,
-      currentBalance: accountData.balances.current!,
+      availableBalance: accountData.balances.available ?? 0,
+      currentBalance: accountData.balances.current ?? 0,
       institutionId: institution.institution_id,
       name: accountData.name,
       officialName: accountData.official_name,
@@ -115,7 +124,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     };
 
     // sort transactions by date such that the most recent transaction is first
-      const allTransactions = [...transactions, ...transferTransactions].sort(
+    const allTransactions = [...(transactions || []), ...transferTransactions].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
@@ -125,6 +134,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     });
   } catch (error) {
     console.error("An error occurred while getting the account:", error);
+    return parseStringify({ data: null, transactions: [] });
   }
 };
 
@@ -138,11 +148,12 @@ export const getInstitution = async ({
       country_codes: ["US"] as CountryCode[],
     });
 
-    const intitution = institutionResponse.data.institution;
+    const institution = institutionResponse.data.institution;
 
-    return parseStringify(intitution);
+    return parseStringify(institution);
   } catch (error) {
-    console.error("An error occurred while getting the accounts:", error);
+    console.error("An error occurred while getting the institution:", error);
+    return null;
   }
 };
 
@@ -162,24 +173,28 @@ export const getTransactions = async ({
 
       const data = response.data;
 
-      transactions = response.data.added.map((transaction) => ({
-        id: transaction.transaction_id,
-        name: transaction.name,
-        paymentChannel: transaction.payment_channel,
-        type: transaction.payment_channel,
-        accountId: transaction.account_id,
-        amount: transaction.amount,
-        pending: transaction.pending,
-        category: transaction.category ? transaction.category[0] : "",
-        date: transaction.date,
-        image: transaction.logo_url,
-      }));
+      transactions = [
+        ...transactions,
+        ...response.data.added.map((transaction) => ({
+          id: transaction.transaction_id,
+          name: transaction.name,
+          paymentChannel: transaction.payment_channel,
+          type: transaction.payment_channel,
+          accountId: transaction.account_id,
+          amount: transaction.amount,
+          pending: transaction.pending,
+          category: transaction.category ? transaction.category[0] : "",
+          date: transaction.date,
+          image: transaction.logo_url,
+        })),
+      ];
 
       hasMore = data.has_more;
     }
 
     return parseStringify(transactions);
   } catch (error) {
-    console.error("An error occurred while getting the accounts:", error);
+    console.error("An error occurred while getting the transactions:", error);
+    return parseStringify([]);
   }
 };
