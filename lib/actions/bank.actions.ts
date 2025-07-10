@@ -18,7 +18,6 @@ import { getBanks, getBank } from "./user.actions";
 // Get multiple bank accounts
 export const getAccounts = async ({ userId }: getAccountsProps) => {
   try {
-    // get banks from db
     const banks = await getBanks({ userId });
 
     if (!banks) {
@@ -27,41 +26,36 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 
     const accounts = await Promise.all(
       banks.map(async (bank: Bank) => {
-        // get each account info from plaid
         const accountsResponse = await plaidClient.accountsGet({
           access_token: bank.accessToken,
         });
-        const accountData = accountsResponse.data.accounts[0];
+        const accountData = accountsResponse.data.accounts; // All accounts for this bank
 
-        // get institution info from plaid
-        const institution = await getInstitution({
+        const accountsList = accountData.map((account) => ({
+          id: account.account_id,
+          availableBalance: account.balances.available ?? 0,
+          currentBalance: account.balances.current ?? 0,
           institutionId: accountsResponse.data.item.institution_id!,
-        });
-
-        const account = {
-          id: accountData.account_id,
-          availableBalance: accountData.balances.available ?? 0,
-          currentBalance: accountData.balances.current ?? 0,
-          institutionId: institution.institution_id,
-          name: accountData.name,
-          officialName: accountData.official_name,
-          mask: accountData.mask!,
-          type: accountData.type as string,
-          subtype: accountData.subtype! as string,
+          name: account.name,
+          officialName: account.official_name,
+          mask: account.mask!,
+          type: account.type as string,
+          subtype: account.subtype! as string,
           appwriteItemId: bank.$id,
           shareableId: bank.shareableId,
-        };
+        }));
 
-        return account;
+        return accountsList;
       })
     );
 
-    const totalBanks = accounts.length;
-    const totalCurrentBalance = accounts.reduce((total, account) => {
+    const flattenedAccounts = accounts.flat(); // Flatten the array of arrays
+    const totalBanks = flattenedAccounts.length;
+    const totalCurrentBalance = flattenedAccounts.reduce((total, account) => {
       return total + account.currentBalance;
     }, 0);
 
-    return parseStringify({ data: accounts, totalBanks, totalCurrentBalance });
+    return parseStringify({ data: flattenedAccounts, totalBanks, totalCurrentBalance });
   } catch (error) {
     console.error("An error occurred while getting the accounts:", error);
     return parseStringify({ data: [], totalBanks: 0, totalCurrentBalance: 0 });
@@ -71,20 +65,17 @@ export const getAccounts = async ({ userId }: getAccountsProps) => {
 // Get one bank account
 export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
   try {
-    // get bank from db
     const bank = await getBank({ documentId: appwriteItemId });
     if (!bank) {
       console.error("getAccount: Bank not found for documentId:", appwriteItemId);
       return parseStringify({ data: null, transactions: [] });
     }
 
-    // get account info from plaid
     const accountsResponse = await plaidClient.accountsGet({
       access_token: bank.accessToken,
     });
-    const accountData = accountsResponse.data.accounts[0];
+    const accountData = accountsResponse.data.accounts.find((acc) => acc.account_id === bank.accountId) || accountsResponse.data.accounts[0]; // Match by accountId or fallback to first
 
-    // get transfer transactions from appwrite
     const transferTransactionsData = await getTransactionsByBankId({
       bankId: bank.$id,
     });
@@ -101,7 +92,6 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
       })
     ) || [];
 
-    // get institution info from plaid
     const institution = await getInstitution({
       institutionId: accountsResponse.data.item.institution_id!,
     });
@@ -123,7 +113,6 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
       appwriteItemId: bank.$id,
     };
 
-    // sort transactions by date such that the most recent transaction is first
     const allTransactions = [...(transactions || []), ...transferTransactions].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
@@ -165,7 +154,6 @@ export const getTransactions = async ({
   let transactions: any = [];
 
   try {
-    // Iterate through each page of new transaction updates for item
     while (hasMore) {
       const response = await plaidClient.transactionsSync({
         access_token: accessToken,
