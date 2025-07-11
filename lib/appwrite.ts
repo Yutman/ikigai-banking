@@ -8,21 +8,21 @@ export async function createSessionClient() {
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
 
-  const session = await cookies().get('appwrite-session');
-  if (!session || !session.value) {
-    return {
-      account: new Account(client),
-      session: null,
-    };
+  const sessionCookie = cookies().get('appwrite-session');
+  if (!sessionCookie || !sessionCookie.value) {
+    console.log('No session cookie found');
+    return null; // Return null if no session
   }
 
-  client.setSession(session.value);
-
-  return {
-    get account() {
-      return new Account(client);
-    },
-  };
+  try {
+    client.setSession(sessionCookie.value);
+    const account = new Account(client);
+    await account.get(); // Validate the session
+    return { account }; // Return valid account if session is valid
+  } catch (error) {
+    console.error('Session validation failed:', error);
+    return null; // Return null if validation fails
+  }
 }
 
 export async function createAdminClient() {

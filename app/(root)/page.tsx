@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import HeaderBox from '@/components/HeaderBox';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
 import RightSidebar from '@/components/RightSidebar';
@@ -9,11 +9,14 @@ import RecentTransactions from '@/components/RecentTransactions';
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
   const loggedIn = await getLoggedInUser();
-  const accounts = await getAccounts({ 
-    userId: loggedIn.$id 
-  });
 
-  if (!accounts) return;
+  if (!loggedIn || !loggedIn.$id) {
+    return <div>Please log in to view your accounts</div>; // Graceful fallback
+  }
+
+  const accounts = await getAccounts({ userId: loggedIn.$id });
+
+  if (!accounts) return <div>No accounts available</div>;
 
   const accountsData = accounts?.data;
   const appwriteItemId = (id as string) || accountsData[0]?.appwriteItemId;
@@ -52,6 +55,6 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
       </div>
     </section>
   );
-}
+};
 
-export default Home
+export default Home;
