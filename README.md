@@ -8,9 +8,9 @@ Built with Next.js, Ikigai is a financial SaaS platform that connects to multipl
 - Next.js
 - TypeScript
 - Tailwind CSS
-- Prisma
-- MongoDB
-- Axios
+- Appwrite
+- Dwolla
+- Vercel
 
 ## 🔋 Features
 **Authentication**: An ultra-secure SSR authentication with proper validations and authorization, implemented with a local JWT-based system.
