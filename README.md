@@ -28,23 +28,40 @@ Built with Next.js, Ikigai is a financial SaaS platform that connects to multipl
 
 ## Functionality Testing
 Open the link https://ikigai-banking-bvip.vercel.app/
-Click 'Sign Up' using your details and a valid email address, everything else place mock details. 
+
+Click 'Sign Up' using your details and a valid email address, everything else place mock details
+
 Password can be set as: password123
+
 Once signed up it will go to 'Connect Bank'
+
 *Popup Details*
 Phone Number: 415-555-0011
+
 Code: 123456
+
 Click '+ Add new account'
+
 Choose any bank, eg: Chase
+
 Continue to Login
+
 Username: user_good
+
 Password: pass_good
+
 Code: leave blank
+
 2nd Code: leave blank
+
 Select accounts: you can click multiple accounts
+
 Click additional info then press 'Continue'
+
 Click 'Connect Account Info'
+
 (if it fails the click 'Try another instituition')
+
 Wait till it loads, it will direct you to the Home Page
 
 ## Quick Start
