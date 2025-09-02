@@ -26,6 +26,27 @@ Built with Next.js, Ikigai is a financial SaaS platform that connects to multipl
 
 **Funds Transfer**: Allows users to transfer funds across different accounts.
 
+## Functionality Testing
+Open the link https://ikigai-banking-bvip.vercel.app/
+Click 'Sign Up' using your details and a valid email address, everything else place mock details. 
+Password can be set as: password123
+Once signed up it will go to 'Connect Bank'
+*Popup Details*
+Phone Number: 415-555-0011
+Code: 123456
+Click '+ Add new account'
+Choose any bank, eg: Chase
+Continue to Login
+Username: user_good
+Password: pass_good
+Code: leave blank
+2nd Code: leave blank
+Select accounts: you can click multiple accounts
+Click additional info then press 'Continue'
+Click 'Connect Account Info'
+(if it fails the click 'Try another instituition')
+Wait till it loads, it will direct you to the Home Page
+
 ## Quick Start
 Follow these steps to set up the Ikigai Banking App locally on your machine.
 
@@ -65,7 +86,6 @@ Copy `.env.example` to `.env` and update:
 - Modified `app/(root)/page.tsx` to structure the `home` section with `home-content` and `RightSidebar`, incorporating `HeaderBox`, `TotalBalanceBox`, and `RecentTransactions`.
 - Adjusted `app/globals.css` to refine widths (`Sidebar` at 150px/275px, `RightSidebar` at 200px/275px, `home-content` with calculated max-widths), restore horizontal scrolling, and reposition the 'View All' button near 'Recent Transactions'.
 - Integrated `lib/actions/bank.actions.ts` and `lib/actions/user.actions.ts` for account and user data management, with updates to support JWT authentication.
-- Included `db/hasura.js`, `middleware.js`, `utils/redirectUser.js`, and `lib/utils.js` to implement a local authentication fallback, replacing previous Magic link issues.
 
 ## Contributing
 1. Fork the repository
