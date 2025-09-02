@@ -24,14 +24,14 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const account = await getAccount({ appwriteItemId });
 
   return (
-    <section className='home'>
-      <div className='home-content'>
-        <header className='home-header'>
+    <section className="home">
+      <div className="home-content">
+        <header className="home-header">
           <HeaderBox
-            type='greeting'
-            title='Welcome'
+            type="greeting"
+            title="Welcome"
             user={loggedIn?.firstName || 'Guest'}
-            subtext='Connect, track, transfer, secured and private.'
+            subtext="Connect, track, transfer, secured and private."
           />
           <TotalBalanceBox
             accounts={accountsData}
@@ -46,7 +46,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           page={currentPage}
         />
       </div>
-      <div className='hidden md:flex'>
+      <div className="hidden md:flex">
         <RightSidebar
           user={loggedIn}
           transactions={account?.transactions}
