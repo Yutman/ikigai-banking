@@ -8,14 +8,15 @@ Built with Next.js, Ikigai is a financial SaaS platform that connects to multipl
 - Next.js
 - TypeScript
 - Tailwind CSS
-- Prisma
-- MongoDB
-- Axios
+- Appwrite
+- Dwolla
+- Plaid
+- Vercel
 
 ## 🔋 Features
 **Authentication**: An ultra-secure SSR authentication with proper validations and authorization, implemented with a local JWT-based system.
 
-**Connect Banks**: Integrates with bank account linking functionality (Plaid support pending).
+**Connect Banks**: Integrates with bank account linking functionality using Plaid.
 
 **Home Page**: Shows a general overview of user accounts with total balance from all connected banks, recent transactions, and a 'View All' option.
 
@@ -23,7 +24,7 @@ Built with Next.js, Ikigai is a financial SaaS platform that connects to multipl
 
 **Transaction History**: Includes pagination and filtering options for viewing transaction history.
 
-**Funds Transfer**: Allows users to transfer funds (integration pending).
+**Funds Transfer**: Allows users to transfer funds across different accounts.
 
 ## Quick Start
 Follow these steps to set up the Ikigai Banking App locally on your machine.
