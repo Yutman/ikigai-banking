@@ -25,23 +25,8 @@ export const LoadingProvider = ({
     setIsLoading(loading);
   };
 
-  // Auto-hide loading when route changes
-  useEffect(() => {
-    const handleRouteChange = () => {
-      setIsLoading(false);
-    };
-
-    // Listen for route changes
-    const originalPush = router.push;
-    router.push = (...args) => {
-      handleRouteChange();
-      return originalPush.apply(router, args);
-    };
-
-    return () => {
-      router.push = originalPush;
-    };
-  }, [router]);
+  // Manual loading control - no automatic route change detection
+  // Loading will be controlled explicitly by components
 
   return (
     <LoadingContext.Provider

@@ -81,6 +81,8 @@ const AuthForm = ({ type }: { type: string }) => {
         };
         const newUser = await signUp(userData);
         setUser(newUser);
+        // Stop loading after successful sign-up, but stay on Connect Bank page
+        setLoading(false);
       }
 
       if (type === "sign-in") {
@@ -113,8 +115,9 @@ const AuthForm = ({ type }: { type: string }) => {
   // Handle loading state for successful sign-up
   React.useEffect(() => {
     if (user && type === "sign-up") {
-      // For sign-up, redirect to home after user is created
-      router.push("/");
+      // For sign-up, stay on the Connect Bank page - don't redirect automatically
+      // The user should connect a bank first before going to home
+      console.log("User created successfully, staying on Connect Bank page");
     }
   }, [user, type, router]);
 

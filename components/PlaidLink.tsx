@@ -11,10 +11,12 @@ import {
   exchangePublicToken,
 } from "@/lib/actions/user.actions";
 import Image from "next/image";
+import { useLoading } from "@/lib/contexts/LoadingContext";
 
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   const router = useRouter();
   const [token, setToken] = useState("");
+  const { setLoading, setLoadingMessage } = useLoading();
 
   useEffect(() => {
     const getLinkToken = async () => {
@@ -26,16 +28,28 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(
     async (public_token: string, metadata: any) => {
-      const accounts = metadata.accounts;
-      for (const account of accounts) {
-        await exchangePublicToken({
-          publicToken: public_token,
-          user,
-        });
+      try {
+        // Show loading while connecting bank
+        setLoading(true);
+        setLoadingMessage("Connecting your bank account...");
+        
+        const accounts = metadata.accounts;
+        for (const account of accounts) {
+          await exchangePublicToken({
+            publicToken: public_token,
+            user,
+          });
+        }
+        // Only redirect to home after successful bank connection
+        console.log("Bank connected successfully, redirecting to home");
+        router.push("/");
+      } catch (error) {
+        console.error("Error connecting bank:", error);
+        setLoading(false); // Stop loading on error
+        // Don't redirect if there was an error
       }
-      router.push("/");
     },
-    [user, router]
+    [user, router, setLoading, setLoadingMessage]
   );
 
   const config: PlaidLinkOptions = {
