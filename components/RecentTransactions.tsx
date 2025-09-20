@@ -24,7 +24,7 @@ const RecentTransactions = ({
 
   return (
     <section className='recent-transactions'>
-        <header className='flex items-center justufy-between'>
+        <header className='flex items-center justify-between w-full'>
             <h2 className='recent-transactions-label'>
                 Recent Transactions
             </h2>

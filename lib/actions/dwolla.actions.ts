@@ -55,11 +55,37 @@ export const createDwollaCustomer = async (
   newCustomer: NewDwollaCustomerParams
 ) => {
   try {
-    return await dwollaClient
-      .post("customers", newCustomer)
-      .then((res) => res.headers.get("location"));
+    console.log('Creating Dwolla customer with data:', {
+      firstName: newCustomer.firstName,
+      lastName: newCustomer.lastName,
+      email: newCustomer.email,
+      type: newCustomer.type
+    });
+
+    const response = await dwollaClient.post("customers", newCustomer);
+    const location = response.headers.get("location");
+    
+    if (!location) {
+      throw new Error('Dwolla customer creation failed - no location header returned');
+    }
+
+    console.log('Dwolla customer created successfully:', location);
+    return location;
   } catch (err) {
-    console.error("Creating a Dwolla Customer Failed: ", err);
+    console.error("Creating a Dwolla Customer Failed: ", {
+      error: err,
+      customerData: {
+        firstName: newCustomer.firstName,
+        lastName: newCustomer.lastName,
+        email: newCustomer.email
+      }
+    });
+    
+    // Re-throw with more context
+    if (err instanceof Error) {
+      throw new Error(`Dwolla customer creation failed: ${err.message}`);
+    }
+    throw new Error('Dwolla customer creation failed with unknown error');
   }
 };
 
