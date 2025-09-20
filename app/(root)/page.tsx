@@ -1,10 +1,10 @@
-import React from 'react';
-import HeaderBox from '@/components/HeaderBox';
-import TotalBalanceBox from '@/components/TotalBalanceBox';
-import RightSidebar from '@/components/RightSidebar';
-import { getLoggedInUser } from '@/lib/actions/user.actions';
-import { getAccounts, getAccount } from '@/lib/actions/bank.actions';
-import RecentTransactions from '@/components/RecentTransactions';
+import React from "react";
+import HeaderBox from "@/components/HeaderBox";
+import TotalBalanceBox from "@/components/TotalBalanceBox";
+import RightSidebar from "@/components/RightSidebar";
+import { getLoggedInUser } from "@/lib/actions/user.actions";
+import { getAccounts, getAccount } from "@/lib/actions/bank.actions";
+import RecentTransactions from "@/components/RecentTransactions";
 
 const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
   const currentPage = Number(page as string) || 1;
@@ -30,7 +30,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           <HeaderBox
             type="greeting"
             title="Welcome"
-            user={loggedIn?.firstName || 'Guest'}
+            user={loggedIn?.firstName || "Guest"}
             subtext="Connect, track, transfer, secured and private."
           />
           <TotalBalanceBox
@@ -46,7 +46,7 @@ const Home = async ({ searchParams: { id, page } }: SearchParamProps) => {
           page={currentPage}
         />
       </div>
-      <div className="hidden md:flex">
+      <div className="hidden xl:block">
         <RightSidebar
           user={loggedIn}
           transactions={account?.transactions}

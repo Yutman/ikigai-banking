@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import CustomInput from "./CustomInput";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -24,6 +24,8 @@ import PlaidLink from "./PlaidLink";
 
 import { Loader2 } from "lucide-react";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
+import LoadingSpinner from "./LoadingSpinner";
+import { useLoading } from "@/lib/contexts/LoadingContext";
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter(); // Initialize router here
@@ -31,6 +33,8 @@ const AuthForm = ({ type }: { type: string }) => {
   const formSchema = authFormSchema(type);
   const [isLoading, setIsLoading] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { setLoading, setLoadingMessage } = useLoading();
 
   React.useEffect(() => {
     const fetchLoggedInUser = async () => {
@@ -52,21 +56,29 @@ const AuthForm = ({ type }: { type: string }) => {
   // 2. Define a submit handler.
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setError(null); // Clear previous errors
+
+    // Set global loading state
+    setLoading(true);
+    setLoadingMessage(
+      type === "sign-up" ? "Creating your account..." : "Signing you in..."
+    );
+
     try {
       // Sign up with Appwrite & create plaid token
       if (type === "sign-up") {
-          const userData = {
-            firstName: data.firstName!,
-            lastName: data.lastName!,
-            address1: data.address1!,
-            city: data.city!,
-            state: data.state!,
-            postalCode: data.postalCode!,
-            dateOfBirth: data.dateOfBirth!,
-            ssn: data.ssn!,
-            email: data.email!,
-            password: data.password, 
-          }
+        const userData = {
+          firstName: data.firstName!,
+          lastName: data.lastName!,
+          address1: data.address1!,
+          city: data.city!,
+          state: data.state!,
+          postalCode: data.postalCode!,
+          dateOfBirth: data.dateOfBirth!,
+          ssn: data.ssn!,
+          email: data.email!,
+          password: data.password,
+        };
         const newUser = await signUp(userData);
         setUser(newUser);
       }
@@ -75,19 +87,36 @@ const AuthForm = ({ type }: { type: string }) => {
         const response = await signIn({
           email: data.email,
           password: data.password,
-      })
+        });
 
         if (response) {
+          // Keep loading spinner active during navigation
           router.push("/");
-          router.refresh();
+          // The loading will end when the new page loads
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Authentication error:", error);
+      setLoading(false); // Hide loading on error
+
+      // Set user-friendly error message
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Handle loading state for successful sign-up
+  React.useEffect(() => {
+    if (user && type === "sign-up") {
+      // For sign-up, redirect to home after user is created
+      router.push("/");
+    }
+  }, [user, type, router]);
 
   return (
     <section className="auth-form">
@@ -113,13 +142,21 @@ const AuthForm = ({ type }: { type: string }) => {
             </p>
           </h1>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <div className="flex">
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
       {user ? (
         <div className="flex flex-col gap-4">
-         <PlaidLink
-              user={user}
-              variant='primary'/>
-          </div>
+          <PlaidLink user={user} variant="primary" />
+        </div>
       ) : (
         <>
           <Form {...form}>
