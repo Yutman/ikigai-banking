@@ -8,6 +8,7 @@ import { Products, CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreat
 import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from './dwolla.actions';
+import { validateEnvironmentVariables, logEnvironmentStatus } from '../env-validation';
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -54,10 +55,26 @@ export const signIn = async ({ email, password }: signInProps) => {
 export const signUp = async ({ password, ...userData}: SignUpParams) => {
   const { email, firstName, lastName } = userData;
 
+  try {
+    // Validate all environment variables
+    await validateEnvironmentVariables();
+  } catch (envError) {
+    console.error('Environment validation failed:', envError);
+    await logEnvironmentStatus();
+    throw new Error('Server configuration error. Please contact support.');
+  }
+
   let newUserAccount;
+  let dwollaCustomerUrl;
+  let newUser;
 
   try {
+    console.log('Starting user sign-up process...');
+    
+    // Step 1: Create Appwrite account
     const { account, database } = await createAdminClient();
+    console.log('Creating Appwrite account...');
+    
     newUserAccount = await account.create(
       ID.unique(),
       email,
@@ -65,20 +82,30 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
       `${firstName} ${lastName}`
     );
 
-     if(!newUserAccount) throw new Error('Error creating user')
+    if (!newUserAccount) {
+      throw new Error('Failed to create user account in Appwrite');
+    }
+    console.log('Appwrite account created successfully');
 
-    const dwollaCustomerUrl = await createDwollaCustomer({
+    // Step 2: Create Dwolla customer
+    console.log('Creating Dwolla customer...');
+    dwollaCustomerUrl = await createDwollaCustomer({
       ...userData,
       type: 'personal'
-    })
+    });
 
-    if(!dwollaCustomerUrl) throw new Error('Error creating Dwolla customer')
+    if (!dwollaCustomerUrl) {
+      throw new Error('Failed to create Dwolla customer - check Dwolla configuration');
+    }
+    console.log('Dwolla customer created successfully');
 
     const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
 
-    const newUser = await database.createDocument(
-      DATABASE_ID!,
-      USER_COLLECTION_ID!,
+    // Step 3: Create user document in Appwrite
+    console.log('Creating user document...');
+    newUser = await database.createDocument(
+      DATABASE_ID,
+      USER_COLLECTION_ID,
       ID.unique(),
       {
         ...userData,
@@ -86,9 +113,20 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
         dwollaCustomerId,
         dwollaCustomerUrl
       }
-    )
+    );
 
+    if (!newUser) {
+      throw new Error('Failed to create user document in Appwrite');
+    }
+    console.log('User document created successfully');
+
+    // Step 4: Create session
+    console.log('Creating user session...');
     const session = await account.createEmailPasswordSession(email, password);
+
+    if (!session) {
+      throw new Error('Failed to create user session');
+    }
 
     cookies().set('appwrite-session', session.secret, {
       path: '/',
@@ -97,10 +135,42 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
       secure: true,
     });
 
+    console.log('User sign-up completed successfully');
     return parseStringify(newUser);
+
   } catch (error) {
-    console.error('Sign-up error:', error);
-    throw error;
+    console.error('Sign-up error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      userData: { email, firstName, lastName }
+    });
+
+    // Cleanup: If we created an Appwrite account but failed later, try to delete it
+    if (newUserAccount && !newUser) {
+      try {
+        console.log('Attempting to cleanup failed user account...');
+        await account.delete(newUserAccount.$id);
+        console.log('Cleanup successful');
+      } catch (cleanupError) {
+        console.error('Failed to cleanup user account:', cleanupError);
+      }
+    }
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('Dwolla')) {
+        throw new Error('Payment service configuration error. Please try again later.');
+      }
+      if (error.message.includes('Appwrite')) {
+        throw new Error('Database service error. Please try again later.');
+      }
+      if (error.message.includes('email')) {
+        throw new Error('Email already exists. Please use a different email or sign in.');
+      }
+      throw new Error(`Sign-up failed: ${error.message}`);
+    }
+
+    throw new Error('An unexpected error occurred during sign-up. Please try again.');
   }
 };
 
