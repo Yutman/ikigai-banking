@@ -1,4 +1,6 @@
-import Image from 'next/image';
+import Image from "next/image";
+import { LoadingProvider } from "@/lib/contexts/LoadingContext";
+import GlobalLoading from "@/components/GlobalLoading";
 
 export default function RootLayout({
   children,
@@ -6,19 +8,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-   <main className='flex min-h-screen w-full justify-betwee font-inter'>
-    {children}
-    <div className="auth-asset">
-      <div>
-        <Image
-            src='/icons/auth-image.svg'
-            alt='Auth-image'
-            width={500}
-            height={500}
+    <LoadingProvider>
+      <main className="flex min-h-screen w-full justify-betwee font-inter">
+        {children}
+        <div className="auth-asset">
+          <div>
+            <Image
+              src="/icons/auth-image.svg"
+              alt="Auth-image"
+              width={500}
+              height={500}
             />
-      </div>
-    </div>
-   </main>
+          </div>
+        </div>
+      </main>
+      <GlobalLoading />
+    </LoadingProvider>
   );
 }
 

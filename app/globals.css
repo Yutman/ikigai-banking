@@ -107,10 +107,20 @@
   /* Home */
   .home {
     @apply no-scrollbar flex w-full flex-row max-xl:max-h-screen max-xl:overflow-y-scroll;
+    min-width: 0; /* Allow flex items to shrink below their content size */
   }
 
   .home-content {
     @apply no-scrollbar flex w-full flex-1 flex-col gap-8 px-5 sm:px-8 py-7 lg:py-12 xl:max-h-screen xl:overflow-y-scroll overflow-x-hidden;
+    /* Responsive width calculation */
+    max-width: calc(100vw - 150px); /* Default: only left sidebar */
+  }
+
+  /* Desktop: account for both sidebars */
+  @media (min-width: 1280px) {
+    .home-content {
+      max-width: calc(100vw - 150px - 355px); /* Left sidebar + Right sidebar */
+    }
   }
 
   .home-header {
@@ -138,7 +148,7 @@
   }
 
   .view-all-btn {
-    @apply text-14 rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-700;
+    @apply text-14 rounded-lg border border-bankGradient bg-bank-gradient font-semibold text-white px-4 py-2.5 shadow-form hover:opacity-90 transition-opacity duration-200;
   }
 
   .recent-transactions-label {
@@ -151,7 +161,10 @@
 
   /* Right sidebar */
   .right-sidebar {
-    @apply no-scrollbar hidden h-screen max-h-screen flex-col border-l border-gray-200 xl:flex w-[355px] xl:overflow-y-scroll;
+    @apply no-scrollbar hidden h-screen max-h-screen flex-col border-l border-gray-200 xl:flex w-[355px] xl:overflow-y-scroll flex-shrink-0;
+    /* Ensure it doesn't cause horizontal overflow */
+    min-width: 355px;
+    max-width: 355px;
   }
 
   .profile-banner {
@@ -357,7 +370,9 @@
 
   /* Sidebar */
   .sidebar {
-    @apply sticky left-0 top-0 flex h-screen w-fit 2xl:w-[355px] flex-col justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6;
+    @apply sticky left-0 top-0 flex h-screen w-fit 2xl:w-[355px] flex-col justify-between border-r border-gray-200 bg-white pt-8 text-white max-md:hidden sm:p-4 xl:p-6 flex-shrink-0;
+    min-width: 150px;
+    max-width: 355px;
   }
 
   .sidebar-logo {
