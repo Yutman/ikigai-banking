@@ -9,6 +9,7 @@ import { plaidClient } from '@/lib/plaid';
 import { revalidatePath } from "next/cache";
 import { addFundingSource, createDwollaCustomer } from './dwolla.actions';
 import { validateEnvironmentVariables, logEnvironmentStatus } from '../env-validation';
+import { withErrorHandling } from '../utils/server-action-wrapper';
 
 const {
   APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -53,19 +54,20 @@ export const signIn = async ({ email, password }: signInProps) => {
 }
 
 export const signUp = async ({ password, ...userData}: SignUpParams) => {
-  const { email, firstName, lastName } = userData;
+  return withErrorHandling(async () => {
+    const { email, firstName, lastName } = userData;
 
-  console.log('Sign-up attempt started for:', { email, firstName, lastName });
+    console.log('Sign-up attempt started for:', { email, firstName, lastName });
 
-  try {
-    // Validate all environment variables
-    await validateEnvironmentVariables();
-    console.log('Environment validation passed');
-  } catch (envError) {
-    console.error('Environment validation failed:', envError);
-    await logEnvironmentStatus();
-    throw new Error('Server configuration error. Please contact support.');
-  }
+    try {
+      // Validate all environment variables
+      await validateEnvironmentVariables();
+      console.log('Environment validation passed');
+    } catch (envError) {
+      console.error('Environment validation failed:', envError);
+      await logEnvironmentStatus();
+      throw new Error('Server configuration error. Please contact support.');
+    }
 
   let newUserAccount;
   let dwollaCustomerUrl;
@@ -145,7 +147,10 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
     console.error('Sign-up error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      userData: { email, firstName, lastName }
+      userData: { email, firstName, lastName },
+      timestamp: new Date().toISOString(),
+      errorType: error?.constructor?.name,
+      errorString: String(error)
     });
 
     // Cleanup: If we created an Appwrite account but failed later, try to delete it
@@ -161,6 +166,13 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
 
     // Provide more specific error messages
     if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        cause: error.cause,
+        stack: error.stack
+      });
+
       if (error.message.includes('Dwolla')) {
         throw new Error('Payment service configuration error. Please try again later.');
       }
@@ -170,11 +182,18 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
       if (error.message.includes('email')) {
         throw new Error('Email already exists. Please use a different email or sign in.');
       }
+      if (error.message.includes('timeout')) {
+        throw new Error('Request timeout. Please try again.');
+      }
+      if (error.message.includes('network')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
       throw new Error(`Sign-up failed: ${error.message}`);
     }
 
     throw new Error('An unexpected error occurred during sign-up. Please try again.');
   }
+  }, 'Sign-up');
 };
 
 export async function getLoggedInUser() {
