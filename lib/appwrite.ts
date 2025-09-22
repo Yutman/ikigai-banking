@@ -26,35 +26,46 @@ export async function createSessionClient() {
 }
 
 export async function createAdminClient() {
-  // Validate required environment variables
-  const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
-  const project = process.env.NEXT_PUBLIC_APPWRITE_PROJECT;
-  const key = process.env.NEXT_APPWRITE_KEY;
+  try {
+    // Validate required environment variables
+    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
+    const project = process.env.NEXT_PUBLIC_APPWRITE_PROJECT;
+    const key = process.env.NEXT_APPWRITE_KEY;
 
-  if (!endpoint) {
-    throw new Error('Missing NEXT_PUBLIC_APPWRITE_ENDPOINT environment variable');
-  }
-  if (!project) {
-    throw new Error('Missing NEXT_PUBLIC_APPWRITE_PROJECT environment variable');
-  }
-  if (!key) {
-    throw new Error('Missing NEXT_APPWRITE_KEY environment variable');
-  }
+    if (!endpoint) {
+      throw new Error('Missing NEXT_PUBLIC_APPWRITE_ENDPOINT environment variable');
+    }
+    if (!project) {
+      throw new Error('Missing NEXT_PUBLIC_APPWRITE_PROJECT environment variable');
+    }
+    if (!key) {
+      throw new Error('Missing NEXT_APPWRITE_KEY environment variable');
+    }
 
-  const client = new Client()
-    .setEndpoint(endpoint)
-    .setProject(project)
-    .setKey(key);
+    console.log('Creating Appwrite admin client with:', {
+      endpoint,
+      project,
+      hasKey: !!key
+    });
 
-  return {
-    get account() {
-      return new Account(client);
-    },
-    get database() {
-      return new Databases(client);
-    },
-    get user() {
-      return new Users(client);
-    },
-  };
+    const client = new Client()
+      .setEndpoint(endpoint)
+      .setProject(project)
+      .setKey(key);
+
+    return {
+      get account() {
+        return new Account(client);
+      },
+      get database() {
+        return new Databases(client);
+      },
+      get user() {
+        return new Users(client);
+      },
+    };
+  } catch (error) {
+    console.error('Failed to create Appwrite admin client:', error);
+    throw error;
+  }
 }

@@ -64,6 +64,13 @@ const AuthForm = ({ type }: { type: string }) => {
       type === "sign-up" ? "Creating your account..." : "Signing you in..."
     );
 
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      setError("Request timeout. Please try again.");
+      setIsLoading(false);
+    }, 60000); // 60 second timeout
+
     try {
       // Sign up with Appwrite & create plaid token
       if (type === "sign-up") {
@@ -108,6 +115,7 @@ const AuthForm = ({ type }: { type: string }) => {
         setError("An unexpected error occurred. Please try again.");
       }
     } finally {
+      clearTimeout(timeoutId); // Clear timeout
       setIsLoading(false);
     }
   };

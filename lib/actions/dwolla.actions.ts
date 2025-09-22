@@ -62,7 +62,14 @@ export const createDwollaCustomer = async (
       type: newCustomer.type
     });
 
-    const response = await dwollaClient.post("customers", newCustomer);
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Dwolla request timeout')), 30000)
+    );
+
+    const dwollaPromise = dwollaClient.post("customers", newCustomer);
+    const response = await Promise.race([dwollaPromise, timeoutPromise]) as any;
+    
     const location = response.headers.get("location");
     
     if (!location) {
@@ -78,14 +85,21 @@ export const createDwollaCustomer = async (
         firstName: newCustomer.firstName,
         lastName: newCustomer.lastName,
         email: newCustomer.email
-      }
+      },
+      timestamp: new Date().toISOString()
     });
     
     // Re-throw with more context
     if (err instanceof Error) {
-      throw new Error(`Dwolla customer creation failed: ${err.message}`);
+      if (err.message.includes('timeout')) {
+        throw new Error('Payment service timeout. Please try again.');
+      }
+      if (err.message.includes('network') || err.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
+      throw new Error(`Payment service error: ${err.message}`);
     }
-    throw new Error('Dwolla customer creation failed with unknown error');
+    throw new Error('Payment service error. Please try again later.');
   }
 };
 

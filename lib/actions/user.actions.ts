@@ -55,9 +55,12 @@ export const signIn = async ({ email, password }: signInProps) => {
 export const signUp = async ({ password, ...userData}: SignUpParams) => {
   const { email, firstName, lastName } = userData;
 
+  console.log('Sign-up attempt started for:', { email, firstName, lastName });
+
   try {
     // Validate all environment variables
     await validateEnvironmentVariables();
+    console.log('Environment validation passed');
   } catch (envError) {
     console.error('Environment validation failed:', envError);
     await logEnvironmentStatus();
