@@ -58,6 +58,14 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
     const { email, firstName, lastName } = userData;
 
     console.log('Sign-up attempt started for:', { email, firstName, lastName });
+    
+    // Log request context for debugging
+    console.log('Request context:', {
+      timestamp: new Date().toISOString(),
+      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Server-side',
+      referrer: typeof window !== 'undefined' ? document.referrer : 'Server-side',
+      url: typeof window !== 'undefined' ? window.location.href : 'Server-side'
+    });
 
     try {
       // Validate all environment variables

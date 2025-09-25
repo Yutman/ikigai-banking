@@ -58,6 +58,16 @@ const AuthForm = ({ type }: { type: string }) => {
     setIsLoading(true);
     setError(null); // Clear previous errors
 
+    // Log client-side context for debugging
+    console.log("Client-side sign-up context:", {
+      userAgent: navigator.userAgent,
+      referrer: document.referrer,
+      url: window.location.href,
+      isWhatsApp: navigator.userAgent.includes("WhatsApp"),
+      isMobile: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent),
+      timestamp: new Date().toISOString(),
+    });
+
     // Set global loading state
     setLoading(true);
     setLoadingMessage(

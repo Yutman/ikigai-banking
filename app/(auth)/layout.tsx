@@ -3,6 +3,7 @@ import { LoadingProvider } from "@/lib/contexts/LoadingContext";
 import GlobalLoading from "@/components/GlobalLoading";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import DevErrorHandler from "@/components/DevErrorHandler";
+import SocialMediaHandler from "@/components/SocialMediaHandler";
 
 export default function RootLayout({
   children,
@@ -12,6 +13,7 @@ export default function RootLayout({
   return (
     <ErrorBoundary>
       <DevErrorHandler>
+        <SocialMediaHandler />
         <LoadingProvider>
           <main className="flex min-h-screen w-full justify-betwee font-inter">
             {children}
