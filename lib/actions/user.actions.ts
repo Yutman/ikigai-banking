@@ -64,7 +64,9 @@ export const signUp = async ({ password, ...userData}: SignUpParams) => {
       timestamp: new Date().toISOString(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'Server-side',
       referrer: typeof window !== 'undefined' ? document.referrer : 'Server-side',
-      url: typeof window !== 'undefined' ? window.location.href : 'Server-side'
+      url: typeof window !== 'undefined' ? window.location.href : 'Server-side',
+      isIOS: typeof window !== 'undefined' ? /iPad|iPhone|iPod/.test(window.navigator.userAgent) : 'Server-side',
+      isIOSWhatsApp: typeof window !== 'undefined' ? (window.navigator.userAgent.includes('WhatsApp') && /iPad|iPhone|iPod/.test(window.navigator.userAgent)) : 'Server-side'
     });
 
     try {

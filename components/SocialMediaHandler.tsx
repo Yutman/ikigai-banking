@@ -8,6 +8,12 @@ const SocialMediaHandler = () => {
     const userAgent = navigator.userAgent;
     const referrer = document.referrer;
 
+    // Enhanced iOS detection
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isIOSWhatsApp = userAgent.includes("WhatsApp") && isIOS;
+    const isIOSSafari =
+      userAgent.includes("Safari") && isIOS && !userAgent.includes("Chrome");
+
     const isFromSocialMedia =
       referrer.includes("whatsapp") ||
       referrer.includes("telegram") ||
@@ -18,6 +24,16 @@ const SocialMediaHandler = () => {
       userAgent.includes("WhatsApp") ||
       userAgent.includes("Telegram");
 
+    console.log("Device and browser detection:", {
+      userAgent,
+      referrer,
+      isIOS,
+      isIOSWhatsApp,
+      isIOSSafari,
+      isFromSocialMedia,
+      timestamp: new Date().toISOString(),
+    });
+
     if (isFromSocialMedia) {
       console.log("User coming from social media:", {
         userAgent,
@@ -25,15 +41,36 @@ const SocialMediaHandler = () => {
         timestamp: new Date().toISOString(),
       });
 
-      // Add a small delay to ensure proper initialization
-      setTimeout(() => {
-        // Force a page refresh to clear any cached issues
-        if (window.performance && window.performance.navigation.type === 1) {
-          // Only refresh if it's a fresh navigation
-          console.log("Refreshing page to clear social media cache issues");
-          window.location.reload();
+      // iOS-specific handling
+      if (isIOS) {
+        console.log("iOS device detected - applying iOS-specific fixes");
+
+        // Force DOM ready state for iOS
+        if (document.readyState !== "complete") {
+          document.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM ready on iOS");
+          });
         }
-      }, 1000);
+
+        // iOS-specific timeout and refresh logic
+        setTimeout(() => {
+          // More aggressive refresh for iOS
+          if (window.performance && window.performance.navigation.type === 1) {
+            console.log(
+              "Refreshing page to clear iOS social media cache issues"
+            );
+            window.location.reload();
+          }
+        }, 2000); // Longer timeout for iOS
+      } else {
+        // Android/other devices
+        setTimeout(() => {
+          if (window.performance && window.performance.navigation.type === 1) {
+            console.log("Refreshing page to clear social media cache issues");
+            window.location.reload();
+          }
+        }, 1000);
+      }
     }
 
     // Handle URL parameters that might be added by social media

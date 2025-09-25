@@ -59,14 +59,28 @@ const AuthForm = ({ type }: { type: string }) => {
     setError(null); // Clear previous errors
 
     // Log client-side context for debugging
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isIOSWhatsApp = userAgent.includes("WhatsApp") && isIOS;
+
     console.log("Client-side sign-up context:", {
-      userAgent: navigator.userAgent,
+      userAgent,
       referrer: document.referrer,
       url: window.location.href,
-      isWhatsApp: navigator.userAgent.includes("WhatsApp"),
-      isMobile: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent),
+      isWhatsApp: userAgent.includes("WhatsApp"),
+      isIOS,
+      isIOSWhatsApp,
+      isMobile: /Mobile|Android|iPhone|iPad/.test(userAgent),
       timestamp: new Date().toISOString(),
     });
+
+    // iOS-specific error handling
+    if (isIOSWhatsApp) {
+      console.log("iOS WhatsApp detected - applying special handling");
+
+      // Add a small delay for iOS to ensure proper initialization
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
 
     // Set global loading state
     setLoading(true);
