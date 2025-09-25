@@ -7,7 +7,7 @@ import { ID } from 'node-appwrite';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, password, address1, city, state, postalCode, dateOfBirth } = body;
+    const { firstName, lastName, email, password, address1, city, state, postalCode, dateOfBirth, kraPin } = body;
 
     console.log('Fallback sign-up attempt:', { email, firstName, lastName });
 
@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
       state,
       postalCode,
       dateOfBirth,
+      ssn: kraPin, // Map KRA-PIN to SSN for Dwolla API
     });
 
     console.log('Dwolla customer created:', dwollaCustomerUrl);

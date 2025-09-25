@@ -21,10 +21,42 @@ const FallbackSignUp = ({ onSuccess }: FallbackSignUpProps) => {
     state: "",
     postalCode: "",
     dateOfBirth: "",
+    kraPin: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const validateForm = () => {
+    // Validate postal code format (US format)
+    const postalCodeRegex = /^\d{5}(-\d{4})?$/;
+    if (!postalCodeRegex.test(formData.postalCode)) {
+      throw new Error("Postal code must be in format 12345 or 12345-6789");
+    }
+
+    // Validate KRA-PIN format
+    const kraPinRegex = /^\d{3}-\d{2}-\d{4}$/;
+    if (!kraPinRegex.test(formData.kraPin)) {
+      throw new Error("KRA-PIN must be in format XXX-XX-XXXX");
+    }
+
+    // Validate date of birth (must be 18+ years old)
+    const today = new Date();
+    const birthDate = new Date(formData.dateOfBirth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 18) {
+      throw new Error("You must be at least 18 years old to create an account");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +64,8 @@ const FallbackSignUp = ({ onSuccess }: FallbackSignUpProps) => {
     setError(null);
 
     try {
+      // Validate form data
+      validateForm();
       // Use fetch API instead of server actions for better browser compatibility
       const response = await fetch("/api/auth/signup-fallback", {
         method: "POST",
@@ -171,10 +205,15 @@ const FallbackSignUp = ({ onSuccess }: FallbackSignUpProps) => {
             <Input
               id="postalCode"
               type="text"
+              placeholder="12345 or 12345-6789"
               value={formData.postalCode}
-              onChange={(e) =>
-                setFormData({ ...formData, postalCode: e.target.value })
-              }
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                if (value.length > 5) {
+                  value = value.slice(0, 5) + "-" + value.slice(5, 9);
+                }
+                setFormData({ ...formData, postalCode: value });
+              }}
               required
             />
           </div>
@@ -190,6 +229,39 @@ const FallbackSignUp = ({ onSuccess }: FallbackSignUpProps) => {
               required
             />
           </div>
+        </div>
+
+        <div>
+          <Label htmlFor="kraPin">KRA-PIN</Label>
+          <Input
+            id="kraPin"
+            type="text"
+            placeholder="123-45-6789"
+            value={formData.kraPin}
+            onChange={(e) => {
+              let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+              if (value.length > 3) {
+                value =
+                  value.slice(0, 3) +
+                  "-" +
+                  value.slice(3, 5) +
+                  "-" +
+                  value.slice(5, 9);
+              } else if (value.length > 5) {
+                value =
+                  value.slice(0, 3) +
+                  "-" +
+                  value.slice(3, 5) +
+                  "-" +
+                  value.slice(5, 9);
+              }
+              setFormData({ ...formData, kraPin: value });
+            }}
+            required
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Required for payment processing. Format: XXX-XX-XXXX
+          </p>
         </div>
 
         {error && (
