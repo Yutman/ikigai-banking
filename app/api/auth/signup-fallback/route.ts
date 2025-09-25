@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
         postalCode,
         dateOfBirth,
         email,
+        ssn: kraPin, // Add SSN field for Appwrite document
         dwollaCustomerId: dwollaCustomerUrl,
         dwollaCustomerUrl,
       }

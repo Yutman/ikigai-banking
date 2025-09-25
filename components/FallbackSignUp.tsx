@@ -238,25 +238,20 @@ const FallbackSignUp = ({ onSuccess }: FallbackSignUpProps) => {
             type="text"
             placeholder="123-45-6789"
             value={formData.kraPin}
-            onChange={(e) => {
-              let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-              if (value.length > 3) {
-                value =
-                  value.slice(0, 3) +
-                  "-" +
-                  value.slice(3, 5) +
-                  "-" +
-                  value.slice(5, 9);
-              } else if (value.length > 5) {
-                value =
-                  value.slice(0, 3) +
-                  "-" +
-                  value.slice(3, 5) +
-                  "-" +
-                  value.slice(5, 9);
-              }
-              setFormData({ ...formData, kraPin: value });
-            }}
+             onChange={(e) => {
+               let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+               
+               // Format as XXX-XX-XXXX
+               if (value.length >= 6) {
+                 value = value.slice(0, 3) + "-" + value.slice(3, 5) + "-" + value.slice(5, 9);
+               } else if (value.length >= 4) {
+                 value = value.slice(0, 3) + "-" + value.slice(3, 5);
+               } else if (value.length >= 1) {
+                 value = value.slice(0, 3);
+               }
+               
+               setFormData({ ...formData, kraPin: value });
+             }}
             required
           />
           <p className="text-xs text-gray-500 mt-1">
