@@ -170,8 +170,12 @@
     @apply text-20 md:text-24 font-semibold text-gray-900;
   }
 
+  .recent-transactions-tablist-container {
+    @apply mb-8 w-full overflow-x-auto;
+  }
+
   .recent-transactions-tablist {
-    @apply custom-scrollbar mb-8 flex w-full flex-nowrap overflow-x-hidden;
+    @apply custom-scrollbar flex w-full flex-nowrap overflow-x-auto min-w-max;
   }
 
   /* Right sidebar */
