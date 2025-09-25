@@ -26,6 +26,8 @@ import { Loader2 } from "lucide-react";
 import { getLoggedInUser, signIn, signUp } from "@/lib/actions/user.actions";
 import LoadingSpinner from "./LoadingSpinner";
 import { useLoading } from "@/lib/contexts/LoadingContext";
+import BrowserCompatibilityHandler from "./BrowserCompatibilityHandler";
+import FallbackSignUp from "./FallbackSignUp";
 
 const AuthForm = ({ type }: { type: string }) => {
   const router = useRouter(); // Initialize router here
@@ -34,6 +36,7 @@ const AuthForm = ({ type }: { type: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [useFallback, setUseFallback] = useState(false);
   const { setLoading, setLoadingMessage } = useLoading();
 
   React.useEffect(() => {
@@ -42,6 +45,24 @@ const AuthForm = ({ type }: { type: string }) => {
       setLoggedInUser(user);
     };
     fetchLoggedInUser();
+
+    // Check browser compatibility
+    const userAgent = navigator.userAgent;
+    const isEdge = /Edg\//.test(userAgent);
+    const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
+    const isWhatsApp = userAgent.includes("WhatsApp");
+    const isSafari = /Safari\//.test(userAgent) && !/Chrome\//.test(userAgent);
+
+    // Use fallback for problematic browsers
+    if (
+      isEdge ||
+      (isMobile && !/Chrome\//.test(userAgent)) ||
+      isWhatsApp ||
+      isSafari
+    ) {
+      console.log("Browser compatibility issue detected, using fallback");
+      setUseFallback(true);
+    }
   }, []);
 
   // 1. Define your form.
@@ -155,6 +176,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
   return (
     <section className="auth-form">
+      <BrowserCompatibilityHandler />
       <header className="flex flex-col gap-5 md:gap-8">
         <Link href="/" className="cursor-pointer flex items-center gap-1">
           <Image
@@ -192,6 +214,8 @@ const AuthForm = ({ type }: { type: string }) => {
         <div className="flex flex-col gap-4">
           <PlaidLink user={user} variant="primary" />
         </div>
+      ) : useFallback && type === "sign-up" ? (
+        <FallbackSignUp onSuccess={() => router.push("/")} />
       ) : (
         <>
           <Form {...form}>
